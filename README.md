@@ -1,8 +1,8 @@
-# EC-RAFT: Automated Generation of Clinical Trial Eligibility Criteria through Retrieval-Augmented Fine-Tuning
+## EC-RAFT: Automated Generation of Clinical Trial Eligibility Criteria through Retrieval-Augmented Fine-Tuning
 
-This repository contains the implementation of EC-RAFT (ACL 2025 findings), a method that utilizes Retrieval-Augmented Fine-Tuning (RAFT) to generate structured and cohesive **eligibility criteria** directly from clinical trial titles and descriptions.
+This repository contains the implementation of [EC-RAFT (ACL 2025 findings)](https://openreview.net/forum?id=ITu3bdLtBn), a method that utilizes Retrieval-Augmented Fine-Tuning (RAFT) to generate structured and cohesive **eligibility criteria** directly from clinical trial titles and descriptions.
 
-## 🚀 Installation
+## Installation
 
 Start by cloning the repository and installing the required dependencies:
 
@@ -13,13 +13,17 @@ pip install -r requirements.txt
 pip install xtuner
 ```
 
-## Predict EC
+## Predict ECs with EC-RAFT
 
 TBD
 
-## 🏃 Quick Start
+## Training EC-RAFT
 
-The EC-RAFT method follows a systematic preprocessing pipeline. The embedding creation step processes clinical trials from the dataset and uses the SciNCL model to create semantic embeddings, which are then stored in ChromaDB for fast retrieval. During data generation, the system retrieves similar trials for each target trial and uses large language models to generate intermediate reasoning steps, creating comprehensive training datasets.
+The EC-RAFT method follows a systematic preprocessing pipeline. The embedding creation step processes clinical trials from the dataset and uses the [SciNCL](https://arxiv.org/abs/2202.06671) to create semantic embeddings, which are then stored in ChromaDB for fast retrieval. During data generation, the system retrieves similar trials for each target trial and uses large language models to generate intermediate reasoning steps, creating comprehensive training datasets.
+
+<div align="center">
+  <img src="assets/training.png" alt="Training EC-RAFT" width="600">
+</div>
 
 ### Step 1: Create Data Embeddings
 
@@ -63,17 +67,13 @@ Then start training:
 xtuner train config/ec-raft-xtuner.py
 ```
 
-
-### 4. Evaluation
-
-Run evaluation on your fine-tuned model:
-
-```bash
-python evaluate.py --experiment_name "my_experiment" --model_path "watt-ai/watt-tool-8B"
-```
-
-
 ## 📈 Evaluation
+
+The evaluation process includes free-text assessment using Gemini for clinical relevance, structured parsing to convert evaluations into JSON format, and metric calculation covering BERTScore, precision, recall, and judge scores.
+
+<div align="center">
+  <img src="assets/evaluation.png" alt="Evaluating ECs Prediction" width="400">
+</div>
 
 **BERTScore** measures semantic similarity between generated and reference criteria, while **LLM-guided evaluation** uses a judge model to assess clinical relevance. Traditional **precision** and **recall** metrics provide quantitative agreement measurements. To run a complete evaluation:
 
@@ -84,9 +84,3 @@ python evaluate.py \
     --reference_column "desired_criteria" \
     --predicted_column "response"
 ```
-
-The evaluation process includes free-text assessment using Gemini for clinical relevance, structured parsing to convert evaluations into JSON format, and metric calculation covering BERTScore, precision, recall, and judge scores.
-
-1. **Free-text Evaluation**: Uses Gemini to assess clinical relevance
-2. **Structured Parsing**: Converts evaluations to JSON format
-3. **Metric Calculation**: Computes BERTScore, precision, recall, and judge scores
