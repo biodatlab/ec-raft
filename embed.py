@@ -17,12 +17,8 @@ def embed_studies_from_dataset(dataset, batch_size=32):
     length = len(dataset['train'])
     
     for study in dataset['train']:
-            metadata = json.loads(study['metadata'])
-            try:
-                title = metadata.get('Official_title', '') or metadata.get('Brief_Title', '')
-            except:
-                print(metadata)
-                continue
+            metadata = study['metadata']
+            title = metadata.get('official_title', '') or metadata.get('brief_title', '')
             detailed_description = study.get('data', '')
 
             if not title or not detailed_description:
@@ -32,17 +28,17 @@ def embed_studies_from_dataset(dataset, batch_size=32):
             
             batch_texts.append(concatenated_text)
             batch_metadata.append({
-                "nctId": metadata.get("NCT_ID", "unknown"),
-                "officialTitle": title,
-                "detailedDescription": detailed_description,
-                "jsonMetadata": json.dumps(metadata, ensure_ascii=True)
+                "nct_id": metadata.get("nct_id", "unknown"),
+                "official_title": title,
+                "detailed_description": detailed_description,
+                "json_metadata": json.dumps(metadata, ensure_ascii=True)
             })
             batch_documents.append(json.dumps({
                 "metadata": metadata,
                 "description": study.get('data', ''),
                 "criteria": study.get('criteria', '')
                 },ensure_ascii=True))
-            batch_ids.append(metadata.get("NCT_ID", "unknown"))
+            batch_ids.append(metadata.get("nct_id", "unknown"))
 
             if len(batch_texts) == batch_size:
                 process_batch(batch_texts, batch_documents, batch_ids, batch_metadata)

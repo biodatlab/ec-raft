@@ -4,8 +4,8 @@ from tqdm import tqdm
 import chromadb
 from sentence_transformers import SentenceTransformer
 from client import Client
-from prompt_gen.prompt_for_cot_gen import PromptGenCoT
-from prompt_gen.prompt_for_inference import PromptForInference
+from prompt_gen.chain_of_thought_prompt_generator import ChainOfThoughtPromptGenerator
+from prompt_gen.inference_prompt_generator import InferencePromptGenerator
 import os
 import argparse
 import uuid
@@ -14,9 +14,9 @@ import time
 from vertexai.batch_prediction import BatchPredictionJob
 import vertexai
 
-PROJECT_ID = "<PROJECT_ID>"
+PROJECT_ID = "<PROJECT_ID>" 
 BUCKET_NAME = "<BUCKET_NAME>"
-DATASET_NAME = "swissnp/ec-raft-clinicaltrials-gov"
+DATASET_NAME = "biodatlab/ec-raft-dataset"
 OUTPUT_DIR = f"./data/no_exp_name"
 
 def set_output_dir(experiment_name):
@@ -37,7 +37,7 @@ def initialize_components():
         embed_model=embed_model
     )
     
-    prompt_gen = PromptGenCoT(client=client_obj)
+    prompt_gen = ChainOfThoughtPromptGenerator(client=client_obj)
     dataset = load_dataset(DATASET_NAME)
     # Take only first 5 rows of each split for testing
     dataset = {split: dataset[split].select(range(5)) for split in dataset.keys()}
@@ -52,16 +52,16 @@ def generate_dataset_with_top_n(n, split, experiment_name):
     
     print(f"Processing {split} split with top-{n} similar studies...")
     for study in tqdm(ravis_dataset[split]):
-        info_for_prompt = prompt_gen.get_info_for_prompt_gen(study, top_n=n)
+        info_for_prompt = prompt_gen.extract_study_info(study, top_n=n)
         
         if info_for_prompt:
-            encoded_related_studies, title, description, desired_criteria = info_for_prompt
+            related_studies_context, title, description, desired_criteria = info_for_prompt
             messages = prompt_gen.get_messages_for_CoT_huggingface(
-                encoded_related_studies, title, description, desired_criteria
+                related_studies_context, title, description, desired_criteria
             )
             
             processed_data.append({
-                'encoded_related_studies': encoded_related_studies,
+                'related_studies_context': related_studies_context,
                 'title': title,
                 'description': description,
                 'desired_criteria': desired_criteria,
@@ -81,8 +81,8 @@ def create_batch_prompts(df):
     batch_prompts = []
     
     for _, row in df.iterrows():
-        prompt = PromptGenCoT.user_prompt_template(
-            row['encoded_related_studies'], 
+        prompt = ChainOfThoughtPromptGenerator.user_prompt_template(
+            row['related_studies_context'], 
             row['title'], 
             row['description'], 
             row['desired_criteria']
@@ -92,7 +92,7 @@ def create_batch_prompts(df):
             "id": row["uuid"],
             "request": {
                 "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                "system_instruction": {"parts": [{"text": PromptGenCoT.system_prompt}]},
+                "system_instruction": {"parts": [{"text": ChainOfThoughtPromptGenerator.system_prompt}]},
             },
         }
         batch_prompts.append(request_format)
@@ -216,11 +216,11 @@ def create_local_dataset(df, split='train'):
         
         print("Generating input and output columns...")
         df_filtered['input'] = df_filtered.apply(
-            lambda x: PromptForInference.gen_input(x['encoded_related_studies'], x['title'], x['description']), 
+            lambda x: InferencePromptGenerator.create_input(x['related_studies_context'], x['title'], x['description']), 
             axis=1
         )
         df_filtered['output'] = df_filtered.apply(
-            lambda x: PromptForInference.gen_output(x['response'], x['desired_criteria']), 
+            lambda x: InferencePromptGenerator.format_output(x['response'], x['desired_criteria']), 
             axis=1
         )
         
@@ -236,7 +236,7 @@ def create_local_dataset(df, split='train'):
         
         print("Generating input column...")
         df['input'] = df.apply(
-            lambda x: PromptForInference.gen_input(x['encoded_related_studies'], x['title'], x['description']), 
+            lambda x: InferencePromptGenerator.create_input(x['related_studies_context'], x['title'], x['description']), 
             axis=1
         )
         

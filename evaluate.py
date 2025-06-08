@@ -16,8 +16,8 @@ from typing import List
 from tqdm import tqdm
 import argparse
 
-PROJECT_ID = "<PROJECT_ID>"
-BUCKET_NAME = "<BUCKET_NAME>"
+PROJECT_ID = "<PROJECT_ID>" 
+BUCKET_NAME = "<BUCKET_NAME>"  
 
 class criteria_item(BaseModel):
     reference: str
@@ -81,7 +81,7 @@ def process_batch_free_text(df, reference_row, predicted_row, exp, max_retries=3
     
     if "uuid" not in df.columns:
         df["uuid"] = [str(uuid.uuid4()) for _ in range(len(df))]
-        df.to_pickle(f"{exp_dir}/{exp}_data_with_uuids.pkl")
+        df.to_parquet(f"{exp_dir}/{exp}_data_with_uuids.parquet")
     
     if "free_text_eval" not in df.columns:
         df["free_text_eval"] = None
@@ -501,7 +501,7 @@ def extract_formatted_criteria(text):
     return match.group(1).strip() if match else ""
 
 def calculate_batch_bertscores(df, batch_size=500):
-    df['predicted_criteria'] = df['response'].apply(extract_formatted_criteria)
+    df['predicted_criteria'] = df['ec-raft-response'].apply(extract_formatted_criteria)
     
     mask = df['predicted_criteria'].str.len() > 0
     valid_df = df[mask].copy()
@@ -569,10 +569,10 @@ def calculate_weighted_stats(grouped_stats, df_parsed):
 
 def main():
     parser = argparse.ArgumentParser(description='Comprehensive evaluation of clinical trial criteria')
-    parser.add_argument('--file', type=str, required=True, help='Input pickle file path')
+    parser.add_argument('--file', type=str, required=True, help='Input parquet file path')
     parser.add_argument('--exp', type=str, required=True, help='Experiment name')
     parser.add_argument('--reference_col', type=str, default='desired_criteria', help='Reference column name')
-    parser.add_argument('--predicted_col', type=str, default='response', help='Predicted column name')
+    parser.add_argument('--predicted_col', type=str, default='ec-raft-response', help='Predicted column name')
     parser.add_argument('--tool_model_path', type=str, default='watt-ai/watt-tool-8B', help='toolcall vLLM model path')
     parser.add_argument('--output_file', type=str, help='Output JSON file path')
     
@@ -585,7 +585,7 @@ def main():
     os.makedirs(exp_dir, exist_ok=True)
     
     print(f"Loading data from {args.file}")
-    df = pd.read_pickle(args.file)
+    df = pd.read_parquet(args.file)
     df = df.head(10)
     
     results = {
@@ -599,12 +599,12 @@ def main():
     if df is None:
         print("Free text evaluation failed")
         return
-    df.to_pickle(f"{exp_dir}/{args.exp}_eval_complete.pkl")
+    df.to_parquet(f"{exp_dir}/{args.exp}_eval_complete.parquet")
     
     # Step 2: JSON parsing
     print("Starting JSON parsing...")
     df = process_json_parsing_with_vllm(df, args.exp, args.tool_model_path)
-    df.to_pickle(f"{exp_dir}/{args.exp}_json_parsed.pkl")
+    df.to_parquet(f"{exp_dir}/{args.exp}_json_parsed.parquet")
     
     # Step 3: Parse and analyze results
     print("Analyzing results...")
