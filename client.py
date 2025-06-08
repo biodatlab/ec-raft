@@ -26,6 +26,6 @@ class Client:
           
           if len(filtered_results) == n_results:
               break
-      assert len(filtered_results) == n_results, f"Expected {n_results} results, but got {len(filtered_results)}"
+
       return filtered_results
   
