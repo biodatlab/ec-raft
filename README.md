@@ -33,7 +33,7 @@ Generate embeddings for the clinical trials dataset using the SciNCL model:
 python embed.py
 ```
 
-This script loads the clinical trials dataset from HuggingFace, creates embeddings, and stores them in ChromaDB for efficient retrieval during training.
+This script loads the prepared [clinical trials dataset](https://huggingface.co/datasets/biodatlab/ec-raft-dataset) from HuggingFace, creates embeddings, and stores them in ChromaDB for efficient retrieval during training.
 
 ### Step 2: Preprocess Training Data
 
