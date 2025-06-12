@@ -111,7 +111,7 @@ python embed.py
 python preprocess.py --experiment_name "my_experiment" --top_n 4 --split test
 
 # Step 3: Generate predictions
-python inference.py --experiment_name "my_experiment"
+python inference.py --input_file "path/to/generated/parquet/by/step/2"
 ```
 
 The inference script will use your trained EC-RAFT model to generate eligibility criteria for the test trials
