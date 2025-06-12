@@ -7,7 +7,8 @@ class Client:
         self.embed_model = embed_model
         self.collection = collection
         
-  def retrieve_relevant_studies(self, query, existing_study: str, n_results=5):
+  def retrieve_relevant_studies(self, title: str, description: str, existing_study: str, n_results=5):
+      query = f'{title} [SEP] {description}'
       query_embedding = self.embed_model.encode(query).tolist()
       
       results = self.collection.query(

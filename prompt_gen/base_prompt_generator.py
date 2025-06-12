@@ -27,6 +27,13 @@ class BasePromptGenerator:
     </STUDY>"""
         return context
 
+    def generate_inference_messages(self, title: str, description: str, study_id: str = "user_input", top_n: int = 4):
+        related_studies = self.client.retrieve_relevant_studies(title, description, study_id, top_n)
+        context = self.build_studies_context([study['document'] for study in related_studies])
+        input_text = self.create_input(context, title, description)
+        messages = self.create_messages(input_text)
+        return messages
+
     def extract_study_info(self, study_info: dict, top_n: int = 5):
         metadata = study_info.get('metadata')
         title = metadata.get('official_title', '') or metadata.get('brief_title', '')
@@ -39,7 +46,12 @@ class BasePromptGenerator:
             print(f"Skipping study {study_id}: Missing title or description or desired criteria or study id")
             return None
 
-        query = f'{title} [SEP] {description}'
-        relevant_studies = self.client.retrieve_relevant_studies(query, study_id, top_n)
+        relevant_studies = self.client.retrieve_relevant_studies(title, description, study_id, top_n)
         related_studies_context = self.build_studies_context([i['document'] for i in relevant_studies])
         return related_studies_context, title, description, desired_criteria
+
+    def create_input(self, context: str, title: str, description: str):
+        raise NotImplementedError("Subclasses must implement create_input method")
+    
+    def create_messages(self, input_text: str):
+        raise NotImplementedError("Subclasses must implement create_messages method")
