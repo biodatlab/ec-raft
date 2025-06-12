@@ -15,7 +15,34 @@ pip install xtuner
 
 ## Predict ECs with EC-RAFT
 
-TBD
+Quick Start with Minimal Inference Script using vLLM
+
+```python
+import chromadb
+from sentence_transformers import SentenceTransformer
+from vllm import LLM, SamplingParams
+from client import Client
+from prompt_gen.inference_prompt_generator import InferencePromptGenerator
+
+title = input("Enter clinical trial title: ")
+description = input("Enter clinical trial description: ")
+
+# Initialize components
+chroma_client = chromadb.PersistentClient(path="./clinical_trials_chroma_all")
+collection = chroma_client.get_collection("clinical_trials_studies")
+embed_model = SentenceTransformer("malteos/scincl")
+llm = LLM(model="biodatlab/ec-raft", tensor_parallel_size=1, max_model_len=25000)
+
+# Setup EC_RAFT client and generator
+client = Client(chroma_client, embed_model, collection)
+inference_generator = InferencePromptGenerator(client)
+
+# Generate and process response
+messages = inference_generator.generate_inference_messages(title, description, "user_input", 4)
+formatted_prompt = llm.get_tokenizer().apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
+outputs = llm.generate([formatted_prompt], SamplingParams(max_tokens=4096, min_p=0.03, temperature=0.3))
+response = outputs[0].outputs[0].text
+```
 
 ## Training EC-RAFT
 
@@ -67,6 +94,23 @@ Then start training:
 xtuner train config/ec-raft-xtuner.py
 ```
 
+## Run EC-RAFT on test dataset
+
+To run the complete EC-RAFT pipeline on the test dataset:
+
+```bash
+# Step 1: Create embeddings
+python embed.py
+
+# Step 2: Preprocess test data with retrieval
+python preprocess.py --experiment_name "my_experiment" --top_n 4 --split test
+
+# Step 3: Generate predictions
+python inference.py --experiment_name "my_experiment"
+```
+
+The inference script will use your trained EC-RAFT model to generate eligibility criteria for the test trials
+
 ## 📈 Evaluation
 
 The evaluation process includes free-text assessment using Gemini for clinical relevance, structured parsing to convert evaluations into JSON format, and metric calculation covering BERTScore, precision, recall, and judge scores.
@@ -80,7 +124,6 @@ The evaluation process includes free-text assessment using Gemini for clinical r
 ```bash
 python evaluate.py \
     --experiment_name "my_experiment" \
-    --tool_model_path "path/to/watt-tool-8B" \
     --reference_column "desired_criteria" \
     --predicted_column "response"
 ```

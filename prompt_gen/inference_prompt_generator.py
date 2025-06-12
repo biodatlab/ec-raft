@@ -1,13 +1,15 @@
-class PromptForInference:
+from .base_prompt_generator import BasePromptGenerator
+
+class InferencePromptGenerator(BasePromptGenerator):
     @staticmethod
-    def gen_messages(input):
+    def create_messages(input):
         return [
             {"role": "user", "content": input},
         ]
     @staticmethod
-    def gen_input(encoded_realted_studies: str, title: str, description: str):
+    def create_input(related_studies_context: str, title: str, description: str):
         return f"""<RELATED_STUDIES>
-{encoded_realted_studies}
+{related_studies_context}
 </RELATED_STUDIES>
 
 Target Study Title: {title}
@@ -48,7 +50,7 @@ Exclusion Criteria:
 """
 
     @staticmethod
-    def gen_output(justification: str, criteria: str):
+    def format_output(justification: str, criteria: str):
         return f"""{justification.replace("<STEP-BY-STEP-DERIVATION-FROM-TITLE-AND-DESCRIPTION>", "").replace("</STEP-BY-STEP-DERIVATION-FROM-TITLE-AND-DESCRIPTION>", "").strip()}
 <FORMATTED_CRITERIA>
 {criteria.replace('INCLUSION CRITERIA', 'Inclusion Criteria').replace('EXCLUSION CRITERIA', 'Exclusion Criteria')}
