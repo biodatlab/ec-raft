@@ -46,7 +46,7 @@ inference_generator = InferencePromptGenerator(client)
 messages = inference_generator.generate_inference_messages(title, description, "user_input", 4)
 formatted_prompt = llm.get_tokenizer().apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
 outputs = llm.generate([formatted_prompt], SamplingParams(max_tokens=4096, min_p=0.03, temperature=0.3))
-response = outputs[0].text
+response = outputs[0].outputs[0].text
 ```
 
 ## Training EC-RAFT
