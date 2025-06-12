@@ -16,6 +16,7 @@ pip install xtuner
 ## Predict ECs with EC-RAFT
 
 Quick Start with Minimal Inference Script using vLLM
+**Note**: First run `python embed.py` if you haven't already to create the required embeddings.
 
 ```python
 import chromadb
