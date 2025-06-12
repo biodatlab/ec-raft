@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/ec-raft-logo.png" alt="EC-RAFT Logo" width="400">
+</div>
+
 ## EC-RAFT: Automated Generation of Clinical Trial Eligibility Criteria through Retrieval-Augmented Fine-Tuning
 
 This repository contains the implementation of [EC-RAFT (ACL 2025 findings)](https://openreview.net/forum?id=ITu3bdLtBn), a method that utilizes Retrieval-Augmented Fine-Tuning (RAFT) to generate structured and cohesive **eligibility criteria** directly from clinical trial titles and descriptions.
@@ -42,7 +46,7 @@ inference_generator = InferencePromptGenerator(client)
 messages = inference_generator.generate_inference_messages(title, description, "user_input", 4)
 formatted_prompt = llm.get_tokenizer().apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
 outputs = llm.generate([formatted_prompt], SamplingParams(max_tokens=4096, min_p=0.03, temperature=0.3))
-response = outputs[0].outputs[0].text
+response = outputs[0].text
 ```
 
 ## Training EC-RAFT
