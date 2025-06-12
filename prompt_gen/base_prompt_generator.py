@@ -28,7 +28,7 @@ class BasePromptGenerator:
         return context
 
     def generate_inference_messages(self, title: str, description: str, study_id: str = "user_input", top_n: int = 4):
-        related_studies = self.client.retrieve_relevant_studies(title, description, study_id, top_n)
+        related_studies = self.client.retrieve_relevant_studies(title, description, study_id, n_results=top_n)
         context = self.build_studies_context([study['document'] for study in related_studies])
         input_text = self.create_input(context, title, description)
         messages = self.create_messages(input_text)
@@ -46,7 +46,7 @@ class BasePromptGenerator:
             print(f"Skipping study {study_id}: Missing title or description or desired criteria or study id")
             return None
 
-        relevant_studies = self.client.retrieve_relevant_studies(title, description, study_id, top_n)
+        relevant_studies = self.client.retrieve_relevant_studies(title, description, study_id, n_results=top_n)
         related_studies_context = self.build_studies_context([i['document'] for i in relevant_studies])
         return related_studies_context, title, description, desired_criteria
 
