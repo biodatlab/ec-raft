@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 client = chromadb.PersistentClient(path="./clinical_trials_chroma_all")
 model = SentenceTransformer("malteos/scincl")
 collection_studies = client.get_or_create_collection("clinical_trials_studies")
-ravis_dataset = load_dataset("swissnp/ec-raft-clinicaltrials-gov")
+ravis_dataset = load_dataset("biodatlab/ec-raft-dataset")
 
 def embed_studies_from_dataset(dataset, batch_size=32):
     batch_texts = []       
