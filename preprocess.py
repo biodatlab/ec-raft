@@ -39,8 +39,6 @@ def initialize_components():
     
     prompt_gen = ChainOfThoughtPromptGenerator(client=client_obj)
     dataset = load_dataset(DATASET_NAME)
-    # Take only first 5 rows of each split for testing
-    dataset = {split: dataset[split].select(range(5)) for split in dataset.keys()}
     
     return client_obj, prompt_gen, dataset
 
