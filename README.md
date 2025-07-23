@@ -4,7 +4,7 @@
 
 ## EC-RAFT: Automated Generation of Clinical Trial Eligibility Criteria through Retrieval-Augmented Fine-Tuning
 
-This repository contains the implementation of [EC-RAFT (ACL 2025 findings)](https://openreview.net/forum?id=ITu3bdLtBn), a method that utilizes Retrieval-Augmented Fine-Tuning (RAFT) to generate structured and cohesive **eligibility criteria** directly from clinical trial titles and descriptions.
+This repository contains the implementation of [EC-RAFT (ACL 2025 findings)](https://aclanthology.org/2025.findings-acl.491/), a method that utilizes Retrieval-Augmented Fine-Tuning (RAFT) to generate structured and cohesive **eligibility criteria** directly from clinical trial titles and descriptions.
 
 ## Installation
 
@@ -131,4 +131,31 @@ python evaluate.py \
     --experiment_name "my_experiment" \
     --reference_column "desired_criteria" \
     --predicted_column "response"
+```
+
+## BibTeX Citation
+
+If you use [EC-RAFT](https://aclanthology.org/2025.findings-acl.491/) in your research, cite our paper using the following BibTex
+
+```
+@inproceedings{lekuthai-etal-2025-ec,
+    title = "{EC}-{RAFT}: Automated Generation of Clinical Trial Eligibility Criteria through Retrieval-Augmented Fine-Tuning",
+    author = "Lekuthai, Nopporn  and
+      Pewngam, Nattawit  and
+      Sokrai, Supitcha  and
+      Achakulvisut, Titipat",
+    editor = "Che, Wanxiang  and
+      Nabende, Joyce  and
+      Shutova, Ekaterina  and
+      Pilehvar, Mohammad Taher",
+    booktitle = "Findings of the Association for Computational Linguistics: ACL 2025",
+    month = jul,
+    year = "2025",
+    address = "Vienna, Austria",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2025.findings-acl.491/",
+    pages = "9432--9444",
+    ISBN = "979-8-89176-256-5",
+    abstract = "Eligibility criteria (EC) are critical components of clinical trial design, defining the parameters for participant inclusion and exclusion. However, designing EC remains a complex, expertise-intensive process. Traditional approaches to EC generation may fail to produce comprehensive, contextually appropriate criteria. To address these challenges, we introduce EC-RAFT, a method that utilizes Retrieval-Augmented Fine-Tuning (RAFT) to generate structured and cohesive EC directly from clinical trial titles and descriptions. EC-RAFT integrates contextual retrieval, synthesized intermediate reasoning, and fine-tuned language models to produce comprehensive EC sets. To enhance clinical alignment evaluation with referenced criteria, we also propose an LLM-guided evaluation pipeline. Our results demonstrate that our solution, which uses Llama-3.1-8B-Instruct as a base model, achieves a BERTScore of 86.23 and an EC-matched LLM-as-a-Judge score of 1.66 out of 3, outperforming zero-shot Llama-3.1 and Gemini-1.5 by 0.41 and 0.11 points, respectively. On top of that, EC-RAFT also outperforms other fine-tuned versions of Llama-3.1. EC-RAFT was trained in a low-cost setup and, therefore, can be used as a practical solution for EC generation while ensuring quality and relevance in clinical trial design. We release our code on GitHub at https://github.com/biodatlab/ec-raft/"
+}
 ```
