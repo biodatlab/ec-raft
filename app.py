@@ -1,11 +1,7 @@
 import gradio as gr
 import functools
-import chromadb
-from sentence_transformers import SentenceTransformer
-from client import Client
-from prompt_gen.inference_prompt_generator import InferencePromptGenerator
-from vllm import LLM, SamplingParams
 import json
+from inference.core import generate_ec
 
 MAX_INTERVENTIONS = 50
 
@@ -117,29 +113,7 @@ def clear_inputs():
     ]
 
 if __name__ == "__main__":
-    # Initialize ChromaDB client and embedding model
-    client = chromadb.PersistentClient(path="./clinical_trials_chroma_all")
-    model = SentenceTransformer("malteos/scincl", device="cpu")
-    collection = client.get_or_create_collection("clinical_trials_studies")
-
-    # Initialize EC-RAFT client and prompt generator
-    ec_raft_client = Client(client, model, collection)
-    prompt_generator = InferencePromptGenerator(ec_raft_client)
-
-    # Initialize VLLM model
-    llm = LLM(model="biodatlab/ec-raft", max_model_len=13000, gpu_memory_utilization=0.85)
-    sampling_params = SamplingParams(temperature=0.3,min_p=0.03, top_p=0.95, max_tokens=4096)
-
     def generate_model_output(*args):
-        messages = generate_prompt_text(*args)
-        if not messages:
-            return "", ""
-        prompt = llm.get_tokenizer().apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
-        outputs = llm.generate([prompt], sampling_params)
-        response = outputs[0].outputs[0].text
-        return messages[0]['content'], response
-
-    def generate_prompt_text(*args):
         title = args[0]
         brief_summary = args[1]
         detailed_description = args[2]
@@ -180,12 +154,11 @@ if __name__ == "__main__":
                             description += f"\t\t- {name}\n"
         
         if not title.strip() and not description.strip():
-            return ""
+            return "", ""
 
-        model.to("cuda")
-        messages = prompt_generator.generate_inference_messages(title, description)
-        model.to("cpu")
-        return messages
+        result = generate_ec(title=title, description=description)
+        
+        return result["prompt"], result["raw_output"]
 
     with gr.Blocks() as iface:
         gr.Markdown("# EC-RAFT Automated generation of eligibility criteria via RAFT")
