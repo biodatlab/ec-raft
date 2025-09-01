@@ -11,4 +11,4 @@ tqdm==4.67.1
 transformers==4.52.4
 vertexai==1.71.1
 vllm==0.9.1
-xtuner==0.1.23
+gradio==5.43.1
