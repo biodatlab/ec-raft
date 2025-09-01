@@ -2,6 +2,12 @@
   <img src="assets/ec-raft-logo.png" alt="EC-RAFT Logo" width="400">
 </div>
 
+<div align="center">
+    <a href="https://colab.research.google.com/github/biodatlab/ec-raft/blob/main/EC_RAFT_gradio.ipynb">
+        <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+    </a>
+</div>
+
 ## EC-RAFT: Automated Generation of Clinical Trial Eligibility Criteria through Retrieval-Augmented Fine-Tuning
 
 This repository contains the implementation of [EC-RAFT (ACL 2025 findings)](https://aclanthology.org/2025.findings-acl.491/), a method that utilizes Retrieval-Augmented Fine-Tuning (RAFT) to generate structured and cohesive **eligibility criteria** directly from clinical trial titles and descriptions.
@@ -48,6 +54,11 @@ formatted_prompt = llm.get_tokenizer().apply_chat_template(messages, add_generat
 outputs = llm.generate([formatted_prompt], SamplingParams(max_tokens=4096, min_p=0.03, temperature=0.3))
 response = outputs[0].outputs[0].text
 ```
+
+## Interactive Demo with Gradio
+
+For an interactive experience, we provide a Gradio-based web interface. The easiest way to get started is to use the "Open in Colab" badge at the top of this file.
+This will start a local web server where you can interact with the EC-RAFT model.
 
 ## Training EC-RAFT
 
